@@ -36,10 +36,7 @@ pipeline {
         stage('Run Pytest in Docker Test Image') {
             steps {
                 sh '''
-                    # Build test image (same Dockerfile)
                     docker build -t ${DOCKERHUB_REPO}:test -f Dockerfile .
-
-                    # Run pytest inside test container (host network so it can reach MongoDB)
                     docker run --rm --network host ${DOCKERHUB_REPO}:test pytest -v test_app.py || { echo "Tests Failed"; exit 1; }
                 '''
             }
@@ -72,7 +69,6 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent (credentials: [SSH_CREDENTIALS_ID]) {
-
                     withCredentials([
                         string(credentialsId: MONGO_SECRET_ID, variable: 'MONGO_URI'),
                         string(credentialsId: FLASK_SECRET_ID, variable: 'SECRET_KEY')
@@ -110,17 +106,53 @@ pipeline {
     }
 
     post {
+
         always {
             sh '''
                 docker stop mongo-test || true
                 docker rm mongo-test || true
             '''
         }
+
         success {
             echo "Pipeline completed successfully.."
+            emailext(
+                subject: "SUCCESS: Jenkins Pipeline for Flask App",
+                body: """
+Hello Sam,
+
+Your Jenkins pipeline completed successfully.
+
+Job: ${JOB_NAME}
+Build Number: ${BUILD_NUMBER}
+Status: SUCCESS
+Build URL: ${BUILD_URL}
+
+Regards,
+Jenkins
+""",
+                to: "sadomusica@gmail.com"
+            )
         }
+
         failure {
             echo "Pipeline failed.."
+            emailext(
+                subject: "FAILURE: Jenkins Pipeline for Flask App",
+                body: """
+Hello Sam,
+
+Your Jenkins pipeline has FAILED.
+
+Job: ${JOB_NAME}
+Build Number: ${BUILD_NUMBER}
+Status: FAILURE
+Build URL: ${BUILD_URL}
+
+Please check the Jenkins logs for details.
+""",
+                to: "sadomusica@gmail.com"
+            )
         }
     }
 }
