@@ -85,7 +85,7 @@ Also add mongo URI
 
 <img width="976" height="498" alt="image" src="https://github.com/user-attachments/assets/9c8b7c04-92c0-472a-9fac-aba5a45950de" />
 
-# Now select how your Trigger should work - I am selecting tirger that will check Git for every minute if there any changes then it will be run and excecute
+# Now select how your Trigger should work - I am selecting Poll SCM tirgger that will check Git for every minute if there any changes then it will be run and excecute
 <img width="1916" height="968" alt="image" src="https://github.com/user-attachments/assets/ca86262b-1e35-495c-bc68-85d632dd96c5" />
 
 
